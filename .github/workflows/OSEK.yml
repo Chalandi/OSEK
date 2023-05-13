@@ -19,4 +19,4 @@ jobs:
       - name: target-gcc-arm-none-eabi
         run: |
           bash Build.sh
-          ls -la ./Output/OSEK.elf
+          ls -la ./Output/OSEK.*
