@@ -52,46 +52,25 @@ static void Appli_LedInit(void)
 
 TASK(T1)
 {
-	uint32 Cpt=0;
-	OsEventMaskType OsWaitEventMask = EVT_BLINK_BLUE_LED;
-	OsEventMaskType Events = 0;
-	(void)OS_SetRelAlarm(ALARM_BLUE_LED,0,1000);
+  const OsEventMaskType OsWaitEventMask = (OsEventMaskType) (EVT_BLINK_BLUE_LED | EVT_BLINK_GREEN_LED);
+
+	(void)OS_SetRelAlarm(ALARM_BLUE_LED, 0,1000);
+	(void)OS_SetRelAlarm(ALARM_GREEN_LED,0, 500);
 
 	for(;;)
 	{
-		Cpt++;
+    OsEventMaskType Events = (OsEventMaskType) 0U;
+
 		if(E_OK == OS_WaitEvent(OsWaitEventMask))
 		{	
 			(void)OS_GetEvent((OsTaskType)T1, &Events);
+
 			if((Events & EVT_BLINK_BLUE_LED) == EVT_BLINK_BLUE_LED)
 			{
 				OS_ClearEvent(EVT_BLINK_BLUE_LED);
 				TOGGLE_BLUE_LED();
 			}
-			if(Cpt == 10)
-			{
-				OS_CancelAlarm(ALARM_BLUE_LED);
-				OS_ChainTask(T2);			
-			}
-		}
-		else
-		{
-			OS_TerminateTask(); /* In case of error we switch off the task */
-		}
-	}
-}
-#if 0
-TASK(Idle)
-{
-	OsEventMaskType OsWaitEventMask = EVT_BLINK_GREEN_LED;
-	OsEventMaskType Events = 0;
-	(void)OS_SetRelAlarm(ALARM_GREEN_LED,0,1000);
 
-	for(;;)
-	{
-		if(E_OK == OS_WaitEvent(OsWaitEventMask))
-		{	
-			(void)OS_GetEvent((OsTaskType)Idle, &Events);
 			if((Events & EVT_BLINK_GREEN_LED) == EVT_BLINK_GREEN_LED)
 			{
 				OS_ClearEvent(EVT_BLINK_GREEN_LED);
@@ -104,50 +83,17 @@ TASK(Idle)
 		}
 	}
 }
-#else
+
 TASK(Idle)
 {
-	OsEventMaskType Events = 0;
-	(void)OS_SetRelAlarm(ALARM_GREEN_LED,0,1000);
-
 	for(;;)
 	{
 		if(1)
-		{	(void)OS_GetResource(RES_TRACE);
-			(void)OS_GetEvent((OsTaskType)Idle, &Events);
-			if((Events & EVT_BLINK_GREEN_LED) == EVT_BLINK_GREEN_LED)
-			{
-				OS_ClearEvent(EVT_BLINK_GREEN_LED);
-				TOGGLE_GREEN_LED();
-			}
-			(void)OS_ReleaseResource(RES_TRACE);
+		{
 		}
 		else
 		{
-			OS_TerminateTask(); /* In case of error we switch off the task */
+      OS_TerminateTask(); /* In case of error we switch off the task */
 		}
 	}
-}
-#endif
-TASK(T2)
-{
-	OsEventMaskType OsWaitEventMask = EVT_BLINK_FASTER_BLUE_LED;
-	OsEventMaskType Events = 0;
-	(void)OS_SetRelAlarm(ALARM_FASTER_BLUE_LED,0,50);
-
-	for(;;)
-	{
-		(void)OS_WaitEvent(OsWaitEventMask);
-		(void)OS_GetEvent((OsTaskType)T2, &Events);
-		if((Events & EVT_BLINK_FASTER_BLUE_LED) == EVT_BLINK_FASTER_BLUE_LED)
-		{
-			OS_ClearEvent(EVT_BLINK_FASTER_BLUE_LED);
-			TOGGLE_BLUE_LED();
-		}	
-	}
-}
-
-TASK(T3)
-{
-	for(;;);
 }

@@ -1,7 +1,7 @@
 // *****************************************************************************
 // Filename    : SysStartup.c
 // 
-// Core        : STM32F100RB Cortex™-M3  
+// Core        : STM32F100RB Cortex(R)-M3
 // 
 // Board       : STM32VLDISCOVERY
 //
