@@ -1,9 +1,9 @@
 // *****************************************************************************************************************
 // Filename    : OsAsm.c
 // 
-// Core        : Cortex™-M3
+// Core        : Cortex(R)-M3
 //
-// Compiler    : ARM® Compiler v5.06 for µVision (Keil)
+// Compiler    : ARM(R) Compiler v5.06 for uVision (Keil)
 //
 // Author      : Chalandi Amine
 //
@@ -26,8 +26,14 @@
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
+#if defined(__GNUC__)
+__attribute__((naked)) void OsDispatcher(void)
+#else
 __asm void OsDispatcher(void)
+#endif
 {
+  #if defined(__GNUC__)
+  #else
   PRESERVE8 {TRUE}
   extern OS_Dispatcher
 
@@ -37,8 +43,9 @@ __asm void OsDispatcher(void)
   bl.w OS_Dispatcher   /* Call the dispatcher to switch the context */
   mov r13,r0           /* Setup the new stack pointer               */
   pop {r4 - r11, lr}   /* Restore the saved context                 */
-  cpsie i	             /* Unlock the dispatcher                     */
+  cpsie i               /* Unlock the dispatcher                     */
   bx lr
+  #endif
 }
 
 
@@ -51,10 +58,17 @@ __asm void OsDispatcher(void)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
+#if defined(__GNUC__)
+__attribute__((naked)) void OsGetCurrentSP(volatile unsigned int* CurrentSpPtr)
+#else
 __asm void OsGetCurrentSP(volatile unsigned int* CurrentSpPtr)
+#endif
 {
-		str r13,[r0]
-	  bx lr
+  #if defined(__GNUC__)
+  #else
+  str r13,[r0]
+  bx lr
+  #endif
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -66,11 +80,18 @@ __asm void OsGetCurrentSP(volatile unsigned int* CurrentSpPtr)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
+#if defined(__GNUC__)
+__attribute__((naked)) void OsGetPSR(volatile unsigned int* CurrentPsr)
+#else
 __asm void OsGetPSR(volatile unsigned int* CurrentPsr)
+#endif
 {
-		mrs r1, psr
-	  str r1,[r0]
-	  bx lr
+  #if defined(__GNUC__)
+  #else
+  mrs r1, psr
+  str r1,[r0]
+  bx lr
+  #endif
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -82,28 +103,34 @@ __asm void OsGetPSR(volatile unsigned int* CurrentPsr)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
+#if defined(__GNUC__)
+__attribute__((naked)) void OsCat2IsrWrapper(void)
+#else
 __asm void OsCat2IsrWrapper(void)
+#endif
 {
-	PRESERVE8 {TRUE}
-	extern OsStoreStackPointer
-	extern OsGetSavedStackPointer
-	extern OsIsrCallDispatch
-  extern OsRunCat2Isr		
+  #if defined(__GNUC__)
+  #else
+  PRESERVE8 {TRUE}
+  extern OsStoreStackPointer
+  extern OsGetSavedStackPointer
+  extern OsIsrCallDispatch
+  extern OsRunCat2Isr
 
-#ifndef OS_NESTED_INT	
-	cpsid i
-#endif	
-	push {r4 - r11, lr}	         /* Save the context in the stack of the current task                */
-	mov r0,r13                   /* prepare the input parameter for the function OsStoreStackPointer */
-	bl.w OsStoreStackPointer     /* Save the stack pointer of the current task                       */
-	bl.w OsRunCat2Isr            /* Call the ISR (lookup table)                                      */
-	bl.w OsGetSavedStackPointer  /* Restore the stack pointer of the current task                    */
-	bl.w OsIsrCallDispatch       /* Call dispatcher if needed                                        */
-	mov r13,r0                   /* Set the new stack pointer of the active task                     */
-	pop {r4 - r11, lr}           /* Restore the context from the active task                         */
 #ifndef OS_NESTED_INT
-	cpsie i
-#endif	
-	bx lr	
-}	
-
+  cpsid i
+#endif
+  push {r4 - r11, lr}           /* Save the context in the stack of the current task               */
+  mov r0,r13                   /* prepare the input parameter for the function OsStoreStackPointer */
+  bl.w OsStoreStackPointer     /* Save the stack pointer of the current task                       */
+  bl.w OsRunCat2Isr            /* Call the ISR (lookup table)                                      */
+  bl.w OsGetSavedStackPointer  /* Restore the stack pointer of the current task                    */
+  bl.w OsIsrCallDispatch       /* Call dispatcher if needed                                        */
+  mov r13,r0                   /* Set the new stack pointer of the active task                     */
+  pop {r4 - r11, lr}           /* Restore the context from the active task                         */
+#ifndef OS_NESTED_INT
+  cpsie i
+#endif
+  bx lr
+  #endif
+}
