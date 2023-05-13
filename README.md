@@ -1,4 +1,4 @@
-OSEK_cm3
+chalandi/OSEK
 ==================
 
 This repository implements an OSEK-like, bare-metal
