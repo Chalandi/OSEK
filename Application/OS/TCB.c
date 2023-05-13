@@ -19,8 +19,9 @@
 
 #include"TCB.h"
 
+#if !defined(__GNUC__)
 #pragma diag_suppress 1296,1,191,188
-
+#endif
 
 /***************************************************/
 /*            X Macro System Generation            */

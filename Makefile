@@ -15,8 +15,6 @@
 # Defines
 ############################################################################################
 
-HW_TARGET  = stm32f100
-PRJ_NAME   = Osek_$(HW_TARGET)
 OUTPUT_DIR = $(CURDIR)/Output
 OBJ_DIR    = $(CURDIR)/Tmp/Obj
 SRC_DIR    = $(CURDIR)
@@ -94,10 +92,9 @@ LOPS         = -x none                                        \
                -nostdlib                                      \
                -specs=nano.specs                              \
                -specs=nosys.specs                             \
-               -e __my_startup                                \
                $(OPS_BASE)                                    \
                -Wl,--print-memory-usage                       \
-               -Wl,-Map,$(OUTPUT_DIR)/$(PRJ_NAME).map         \
+               -Wl,-Map,$(OUTPUT_DIR)/OSEK.map                \
                -T $(LD_SCRIPT)
 
 
@@ -136,9 +133,9 @@ ifeq ($(MAKECMDGOALS),build)
 -include $(subst .o,.d,$(FILES_O))
 endif
 
-build : clean $(OUTPUT_DIR)/$(PRJ_NAME).elf
+build : clean $(OUTPUT_DIR)/OSEK.elf
 
-all : clean $(OUTPUT_DIR)/$(PRJ_NAME).elf
+all : clean $(OUTPUT_DIR)/OSEK.elf
 
 
 .PHONY : clean
@@ -169,8 +166,7 @@ $(OBJ_DIR)/%.o : %.cpp
 	@$(CPP) $(CPPOPS) $(addprefix -I, $(INC_FILES)) -c $< -o $(OBJ_DIR)/$(basename $(@F)).o 2> $(OBJ_DIR)/$(basename $(@F)).err
 	@-$(PYTHON) $(CC_ERR_FORMAT_SCRIPT) $(OBJ_DIR)/$(basename $(@F)).err -COLOR
 
-$(OUTPUT_DIR)/$(PRJ_NAME).elf : $(FILES_O)
-	@$(LD) $(LOPS) $(FILES_O) -o $(OUTPUT_DIR)/$(PRJ_NAME).elf
-	@$(OBJCOPY) $(OUTPUT_DIR)/$(PRJ_NAME).elf -O ihex $(OUTPUT_DIR)/$(PRJ_NAME).hex
-	@$(OBJCOPY) $(OUTPUT_DIR)/$(PRJ_NAME).elf -O binary $(OUTPUT_DIR)/kernel.img
-	@$(NM) --numeric-sort --print-size $(OUTPUT_DIR)/$(PRJ_NAME).elf | $(CPPFILT) > $(OUTPUT_DIR)/$(PRJ_NAME)_cppfilt.txt
+$(OUTPUT_DIR)/OSEK.elf : $(FILES_O)
+	@$(LD) $(LOPS) $(FILES_O) -o $(OUTPUT_DIR)/OSEK.elf
+	@$(OBJCOPY) $(OUTPUT_DIR)/OSEK.elf -O ihex $(OUTPUT_DIR)/OSEK.hex
+	@$(NM) --numeric-sort --print-size $(OUTPUT_DIR)/OSEK.elf | $(CPPFILT) > $(OUTPUT_DIR)/OSEK_cppfilt.txt

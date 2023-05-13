@@ -7,8 +7,6 @@
 
 /* Linker script for STM32F1xx ARM(R) Cortex(TM)-M3 MCU */
 
-ENTRY(__my_startup)
-
 INPUT(libc.a libm.a libgcc.a)
 
 OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
