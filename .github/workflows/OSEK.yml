@@ -1,0 +1,22 @@
+﻿name: OSEK
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+jobs:
+  target-gcc-arm-none-eabi:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: '0'
+      - name: update-tools
+        run: sudo sudo apt-get update -y;sudo apt-get install -y gcc-arm-none-eabi
+      - name: target-gcc-arm-none-eabi
+        run: |
+          bash Build.sh
+          ls -la ./Output/OSEK.elf
