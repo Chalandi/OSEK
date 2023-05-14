@@ -95,31 +95,31 @@
 #define OS_CONFIG_BEGIN
 
 #define OS_TASK_BEGIN                                                            enum{
-#define OS_TASK_DEF(Name,Prio,StackSize,NbOfActiv,AutoStart,TaskType,SchedType)  Name##,
+#define OS_TASK_DEF(Name,Prio,StackSize,NbOfActiv,AutoStart,TaskType,SchedType)  Name,
 #define OS_TASK_END                                                              INVALID_TASK};
 
 #define NB_OF_TASKS INVALID_TASK
 
 #define OS_EVENT_BEGIN                                                           enum{
-#define OS_EVENT_DEF(Event, Mask)                                                Event## = Mask,
+#define OS_EVENT_DEF(Event, Mask)                                                Event = Mask,
 #define OS_EVENT_END                                                             INVALID_EVENT};
 
 #define NB_OF_EVENTS INVALID_EVENT
 
 #define OS_ALARM_BEGIN                                                           enum{
-#define OS_ALARM_DEF(Name,Action,Event,AutoStart,task,Callback)                  Name##,
+#define OS_ALARM_DEF(Name,Action,Event,AutoStart,task,Callback)                  Name,
 #define OS_ALARM_END                                                             INVALID_ALARM};
 
 #define NB_OF_ALARMS INVALID_ALARM
 
 #define OS_RESOURCE_BEGIN                                                        enum{
-#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks...)                     Name##,
+#define OS_RESOURCE_DEF(Name,CeilingPrio,...)                                    Name,
 #define OS_RESOURCE_END                                                          INVALID_RESOURCE};
 
 #define NB_OF_RESOURCE INVALID_RESOURCE
 
 #define OS_INTERRUPT_BEGIN                                                      enum{
-#define OS_INTERRUPT_CAT2_DEF(IsrNbr,IsrFunc)                                   IsrFunc##,
+#define OS_INTERRUPT_CAT2_DEF(IsrNbr,IsrFunc)                                   IsrFunc,
 #define OS_INTERRUPT_END                                                        INVALID_ISR};
 
 #define NB_OF_ISR INVALID_ISR
@@ -148,7 +148,7 @@
 
 
 #define OS_RESOURCE_BEGIN                                                        
-#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks...)                     
+#define OS_RESOURCE_DEF(Name,CeilingPrio,...)                     
 #define OS_RESOURCE_END                                                          
 
 
@@ -203,7 +203,7 @@
 #define OS_ALARM_END                                                                0};
 
 #define OS_RESOURCE_BEGIN                                                           static Resource_t* Res_Cfg[NB_OF_RESOURCE + 1]={
-#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks...)                        &Resource_##Name,
+#define OS_RESOURCE_DEF(Name,CeilingPrio, ...)                                      &Resource_##Name,
 #define OS_RESOURCE_END                                                             0};
 
 #define OS_INTERRUPT_BEGIN
@@ -229,7 +229,7 @@
 #define OS_ALARM_END
 
 #define OS_RESOURCE_BEGIN                                                         &Res_Cfg[0],
-#define OS_RESOURCE_DEF(Name,CeilingPrio,AuthorizedTasks...)                     
+#define OS_RESOURCE_DEF(Name,CeilingPrio, ...)                     
 #define OS_RESOURCE_END
 
 #define OS_INTERRUPT_BEGIN

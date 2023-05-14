@@ -25,7 +25,7 @@
 
 typedef enum 
 {
-	PRE_READY = 0,
+	PRE_READY,
 	READY,
 	WAITING,
 	RUNNING,
@@ -36,13 +36,13 @@ typedef enum
 
 typedef enum 
 {
-	BASIC = 0,
+	BASIC,
 	EXTENDED
 }OsTasksType;
 
 typedef enum 
 {
-	NONE_PREEMPT = 0,
+	NONE_PREEMPT,
 	FULL_PREEMPT
 }OsTasksSchedType;
 
@@ -77,7 +77,7 @@ typedef enum
 
 typedef enum
 {
-	ALARM_SET_EVENT = 0,
+	ALARM_SET_EVENT,
 	ALARM_ACTIVE_TASK,
 	ALARM_CALLBACK
 	
@@ -85,19 +85,19 @@ typedef enum
 
 typedef enum
 {
-	ALARM_FREE = 0,
+	ALARM_FREE,
 	ALARM_BUSY
 }AlarmStatus;
 
 typedef enum
 {
-	ALARM_ONE_SHOT = 0,
+	ALARM_ONE_SHOT,
 	ALARM_CYCLIC
 }AlarmTypes;
 
 typedef enum
 {
-	ALARM_RELATIVE = 0,
+	ALARM_RELATIVE,
 	ALARM_ABSOLUTE
 }AlarmCatgys;
 
@@ -152,7 +152,7 @@ typedef struct
 {
 	const uint32 ResCeilingPrio;
 	uint32 CurrentOccupiedTask;
-	const uint32* const AuthorizedTask;
+	const uint32* AuthorizedTask;
 }Resource_t;
 
 typedef Alarm_t** OsAlarmBaseRefType;
@@ -182,8 +182,8 @@ typedef struct
 #define ISR(x)  void Os##x##Isr(void)	
 #define pTASK(x) &Task##x##Func
 #define STACK(x,y) uint32 Stack_T_##x[(y/4)]; const uint32 Stack_T_##x##_Size = y 
-#define TSTACK(x) (const uint32)(&Stack_T_##x[((Stack_T_##x##_Size)/4)-1])
-#define BSTACK(x) (const uint32)(&Stack_T_##x[0])
+#define TSTACK(x) (uint32)(&Stack_T_##x[((Stack_T_##x##_Size)/4)-1])
+#define BSTACK(x) (uint32)(&Stack_T_##x[0])
 	
 #define OS_DeclareTask(TaskId)
 #define OS_DeclareResource(ResId)

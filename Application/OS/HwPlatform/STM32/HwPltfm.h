@@ -27,8 +27,13 @@
 #define CLEAR_PENDSV() (*(volatile unsigned int*)(SCB_ICSR))
 #define OS_DISPATCH() SET_PENDSV()	
 
+#if defined(__GNUC__)
+#define ENABLE_INTERRUPTS()  __asm("CPSIE I")
+#define DISABLE_INTERRUPTS() __asm("CPSID I")
+#else
 #define ENABLE_INTERRUPTS()	  __asm{CPSIE I}
 #define DISABLE_INTERRUPTS()	__asm{CPSID I}
+#endif
 
 #define EXCEPTION_CODE_MASK   (uint32)0x1F
 
