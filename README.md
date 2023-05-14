@@ -14,12 +14,14 @@ chalandi/OSEK
 
 This repository implements an OSEK-like, bare-metal
 operating system for ARM(R) Cortex(R)-M3.
-The goal is to achieve near-compatibility with OSEK (ECC1/BCC1).
+The goals are to achieve near-compatibility with OSEK (ECC1/BCC1)
+and to provide an intuitive, esay-to-understand sample application
+that can be extended for your own projects.
 
 Features include:
   - OSEK-like OS implementation with support of most common features.
   - The sample application runs on the STM32F100-NUCLEO Board.
-  - Sample application with tasks and events interacting to produce blinky LED show featuring the gren and blue LEDs toggling at 1Hz (green) and 1/2 Hz (blue) respectively.
+  - Tasks and events interact to produce a blinky LED show featuring the green and blue LEDs toggling at 1Hz (green) and 1/2 Hz (blue) respectively.
   - Use a simple self-written bare-metal startup.
   - Power, clock and port initialization.
   - 1ms timebase derived from the ARM(R) `SysTick`.
