@@ -25,8 +25,8 @@ Features include:
   - 1ms timebase derived from the ARM(R) `SysTick`.
   - Implementation in C99 with absolute minimal use of assembly.
 
-A clear and easy-to-understand build system based on KEIL MDK
-completes this fun and educational project.
+A clear and easy-to-understand build system based on either free GNUmake/GCC
+or alternatively KEIL MDK completes this fun and educational project.
 
 This repository provides keen insight on writing your own
 _bare_ _metal_ operating system from scratch on a modern
