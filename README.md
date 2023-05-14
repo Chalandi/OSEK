@@ -25,8 +25,9 @@ microcontroller using entirely free tools and open standards.
 
 Following low-level chip initialization, the program jumps
 to the `main()` subroutine in [Application/Appli.c](./Application/Appli.c).
-Here the single functional line in `main()`
-starts the operatng system via call to `OS_StartOS()`.
+Here there are two functional lines. The first line initializes the LEDs.
+The second line subsequently starts the operatng system via call
+to `OS_StartOS()`.
 
 An idle task and one single extended task animate the user LED,
 providing a simple blinky LED show featuring the gren and blue
@@ -34,8 +35,23 @@ LED(s) toggling at 1Hz (green) and 1/2 Hz (blue) respectively.
 
 ## Building the Application
 
+### Build with KEIL uVision (MDK)
+
 Build on `Win*` is easy using an installed KEIL-MDK.
-A build system using GCC/GNUmake is in progress.
+Simply use the project file `PRJ_02.uvprojx` which can
+be found in the project's root directory.
+
+### Build with GNUmake on `*nix`
+
+Build on `*nix*` is easy using an installed `gcc-arm-none-eabi`
+
+```sh
+cd OSEK
+./Build.sh
+```
+
+The build results including ELF-file, HEX-mask, MAP-file
+can be found in the `Output` directory following the GNUmake build.
 
 ## References
 Further information on open standard OSEK can be found in ISO 17356 and in the link below:

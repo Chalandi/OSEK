@@ -22,7 +22,14 @@
 //=============================================================================
 // linker symbol
 //=============================================================================
+
+#if defined(__GNUC__) && !defined(__CC_ARM)
+extern void __initial_stack_pointer(void);
+#elif defined(__CC_ARM)
 extern unsigned int Image$$ER_STACK$$ZI$$Limit;
+#else
+#error Error: Compiler startup-code dialect is not supported
+#endif
 
 //=============================================================================
 // extern function prototype
@@ -31,19 +38,33 @@ extern void SysStartup_Init(void);
 extern void OsDispatcher(void);
 extern void OsSysTickTimerIsr(void);
 extern void OsCat2IsrWrapper(void);
+
 //=============================================================================
 // local function prototype
 //=============================================================================
 void undefinedHandler(void);
 void HardFaultdHandler(void);
 
-
 /* Disable the warning D-1296 */
 #pragma diag_suppress 1296
 
-const unsigned int __attribute__((section ("INTVECT"))) IntVector[128]=
+#if defined(__GNUC__) && !defined(__CC_ARM)
+const volatile unsigned int IntVector[128U] __attribute__((section(".isr_vector")));
+#elif defined(__CC_ARM)
+const volatile unsigned int IntVector[128U] __attribute__((section ("INTVECT")));
+#else
+#error Error: Compiler startup-code dialect is not supported
+#endif
+
+const volatile unsigned int IntVector[128U] =
 {
+#if defined(__GNUC__) && !defined(__CC_ARM)
+  __initial_stack_pointer,                   // 0x0000, initial stack pointer
+#elif defined(__CC_ARM)
   (unsigned int)&Image$$ER_STACK$$ZI$$Limit, // 0x0000, initial stack pointer
+#else
+#error Error: Compiler startup-code dialect is not supported
+#endif
   (unsigned int)&SysStartup_Init,            // 0x0004, reset
   (unsigned int)&undefinedHandler,           // 0x0008, nmi exception
   (unsigned int)&HardFaultdHandler,          // 0x000C, hard fault exception
