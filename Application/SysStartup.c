@@ -26,7 +26,7 @@ extern unsigned int Image$$ER_RW_DATA$$RW$$Base;
 extern unsigned int Image$$ER_RW_DATA$$RW$$Length;
 
 #define ROM_DATA_SECTION_BASE (unsigned int)&Image$$ER_RW_DATA$$RW$$Base
-#define ROM_DATA_SECTION_SIZE (unsigned int)&Image$$ER_RW_DATA$$RW$$Length	
+#define ROM_DATA_SECTION_SIZE (unsigned int)&Image$$ER_RW_DATA$$RW$$Length
 
 //=============================================================================
 // Execution region symbols (.data)
@@ -41,8 +41,7 @@ extern unsigned int Load$$ER_RW_DATA$$RW$$Base;
 extern unsigned int Image$$ER_RW_DATA$$ZI$$Base;
 extern unsigned int Image$$ER_RW_DATA$$ZI$$Length;
 #define BSS_SECTION_BASE (unsigned int)&Image$$ER_RW_DATA$$ZI$$Base
-#define BSS_SECTION_SIZE (unsigned int)&Image$$ER_RW_DATA$$ZI$$Length	
-
+#define BSS_SECTION_SIZE (unsigned int)&Image$$ER_RW_DATA$$ZI$$Length
 
 //=============================================================================
 // function prototype
@@ -54,16 +53,24 @@ static void SysStartup_Memcpy(unsigned char* target, const unsigned char* source
 static void SysStartup_RunApplication(void);
 static void SysStartup_Unexpected_Exit(void);
 static void SysStartup_InitSystemClock(void);
+
 //=============================================================================
 // extern function prototype
 //=============================================================================
- int main(void)__attribute__((weak));
+int main(void)__attribute__((weak));
 
 //=============================================================================
 // macros
 //=============================================================================
-#define ENABLE_INTERRUPTS()	  __asm{CPSIE I}
-#define DISABLE_INTERRUPTS()	__asm{CPSID I}
+#if defined(__GNUC__) && !defined(__CC_ARM)
+#define ENABLE_INTERRUPTS()  __asm("CPSIE I")
+#define DISABLE_INTERRUPTS() __asm("CPSID I")
+#elif defined(__CC_ARM)
+#define ENABLE_INTERRUPTS()  __asm{CPSIE I}
+#define DISABLE_INTERRUPTS() __asm{CPSID I}
+#else
+#error Error: Compiler inline assembly dialect is not supported
+#endif
 
 //-----------------------------------------------------------------------------
 /// \brief  Memset function
@@ -106,13 +113,12 @@ static void SysStartup_Memcpy(unsigned char* target, const unsigned char* source
 //-----------------------------------------------------------------------------
 void SysStartup_Init(void)
 {
-	SysStartup_InitSystemClock(); /* Configure the system clock */
-	
-	SysStartup_InitRam();         /* Init .bss and .data sections */
-	
-	SysStartup_RunApplication();  /* Call main function */	
-}
+  SysStartup_InitSystemClock(); /* Configure the system clock */
 
+  SysStartup_InitRam();         /* Init .bss and .data sections */
+
+  SysStartup_RunApplication();  /* Call main function */  
+}
 
 //-----------------------------------------------------------------------------
 /// \brief  SysStartup_InitRam function
@@ -123,17 +129,17 @@ void SysStartup_Init(void)
 //-----------------------------------------------------------------------------
 static void SysStartup_InitRam(void)
 {
-	/* Copie .data from ROM to RAM */
-	if(ROM_DATA_SECTION_SIZE > 0)
-	{
-		SysStartup_Memcpy((unsigned char*)ROM_DATA_SECTION_BASE,(const unsigned char*)RAM_DATA_SECTION_BASE,ROM_DATA_SECTION_SIZE);
-	}
-	
-	/* Init .bss section */
-	if(BSS_SECTION_SIZE > 0)
-	{
-		SysStartup_Memset((unsigned char*)BSS_SECTION_BASE,0,BSS_SECTION_SIZE);
-	}	
+  /* Copie .data from ROM to RAM */
+  if(ROM_DATA_SECTION_SIZE > 0)
+  {
+    SysStartup_Memcpy((unsigned char*)ROM_DATA_SECTION_BASE,(const unsigned char*)RAM_DATA_SECTION_BASE,ROM_DATA_SECTION_SIZE);
+  }
+
+  /* Init .bss section */
+  if(BSS_SECTION_SIZE > 0)
+  {
+    SysStartup_Memset((unsigned char*)BSS_SECTION_BASE,0,BSS_SECTION_SIZE);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -145,17 +151,17 @@ static void SysStartup_InitRam(void)
 //-----------------------------------------------------------------------------
 static void SysStartup_RunApplication(void)
 {
-	if((unsigned int) main != 0) /* check the weak function */
-	{
-		/* Enable the interrupts */
+  if((unsigned int) main != 0) /* check the weak function */
+  {
+    /* Enable the interrupts */
     ENABLE_INTERRUPTS();
-		
-		/* Call the main function */
-    (void)main();            
-	}
-	
-	SysStartup_Unexpected_Exit(); /* Catch unexpected exit from main or if main dosent exist */
-}	
+
+    /* Call the main function */
+    (void)main();
+  }
+
+  SysStartup_Unexpected_Exit(); /* Catch unexpected exit from main or if main dosent exist */
+}
 
 //-----------------------------------------------------------------------------
 /// \brief  SysStartup_Unexpected_Exit function
@@ -166,8 +172,9 @@ static void SysStartup_RunApplication(void)
 //-----------------------------------------------------------------------------
 static void SysStartup_Unexpected_Exit(void)
 {
-	for(;;);	
-}	
+  for(;;);
+}
+
 //-----------------------------------------------------------------------------
 /// \brief  SysStartup_InitSystemClock function
 ///
@@ -177,31 +184,31 @@ static void SysStartup_Unexpected_Exit(void)
 //-----------------------------------------------------------------------------
 static void SysStartup_InitSystemClock(void)
 {
-	/* Using 24 MHz from PLL as system clock */
-	#define RCC_BASE 0x40021000UL
-	#define RCC_CR  (*((volatile unsigned int *)(RCC_BASE + 0x00u)))
-	#define RCC_CFG (*((volatile unsigned int *)(RCC_BASE + 0x04u)))
-	#define RCC_APB2RSTR (*((volatile unsigned int *)(RCC_BASE + 0x0Cu)))	
-    #define RCC_APB2ENR (*((volatile unsigned int *)(RCC_BASE + 0x18u)))		
-	
-	/* Setup the PLL prescaler to x6 (max 24 MHz) */
-	RCC_CFG = 0x00100000UL;
-	
-	/* Enable the PLL */
-	RCC_CR |= (1<<24);
-	
-	/* Set PLL (24 MHz) as system clock */
-	RCC_CFG |= 0x00000002UL;
-	
-	/* Enable the Clock for GPIO Port A */
-	RCC_APB2ENR |= (1<<2);		
-	
-	/* Enable the Clock for GPIO Port C */
-	RCC_APB2ENR |= (1<<4);
+  /* Using 24 MHz from PLL as system clock */
+  #define RCC_BASE 0x40021000UL
+  #define RCC_CR  (*((volatile unsigned int *)(RCC_BASE + 0x00u)))
+  #define RCC_CFG (*((volatile unsigned int *)(RCC_BASE + 0x04u)))
+  #define RCC_APB2RSTR (*((volatile unsigned int *)(RCC_BASE + 0x0Cu)))
+  #define RCC_APB2ENR (*((volatile unsigned int *)(RCC_BASE + 0x18u)))
 
-	/* Enable the Clock for alternate function */
-	RCC_APB2ENR |= (1<<0);		
-	
+  /* Setup the PLL prescaler to x6 (max 24 MHz) */
+  RCC_CFG = 0x00100000UL;
+
+  /* Enable the PLL */
+  RCC_CR |= (1<<24);
+
+  /* Set PLL (24 MHz) as system clock */
+  RCC_CFG |= 0x00000002UL;
+
+  /* Enable the Clock for GPIO Port A */
+  RCC_APB2ENR |= (1<<2);
+
+  /* Enable the Clock for GPIO Port C */
+  RCC_APB2ENR |= (1<<4);
+
+  /* Enable the Clock for alternate function */
+  RCC_APB2ENR |= (1<<0);
+
  /* Enable the Clock for USART1 */
-	RCC_APB2ENR |= (1<<14);	
+  RCC_APB2ENR |= (1<<14);
 }
