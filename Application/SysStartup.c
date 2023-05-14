@@ -19,6 +19,43 @@
 //
 // *****************************************************************************
 
+#if defined(__GNUC__) && !defined(__CC_ARM)
+
+// ***************************************************************************************
+//=========================================================================================
+// types definitions
+//=========================================================================================
+typedef struct {
+
+    unsigned long  sourceAddr;  /* Source Address (section in ROM memory) */
+    unsigned long  targetAddr;  /* Target Address (section in RAM memory) */
+    unsigned long  size;        /* length of section (bytes) */
+
+} runtimeCopyTable_t;
+
+typedef struct {
+
+    unsigned long  Addr;  /* source Address (section in RAM memory) */
+    unsigned long  size;  /* length of section (bytes) */
+
+} runtimeClearTable_t;
+
+//=========================================================================================
+// linker variables
+//=========================================================================================
+extern const runtimeCopyTable_t __RUNTIME_COPY_TABLE[];
+extern const runtimeClearTable_t __RUNTIME_CLEAR_TABLE[];
+extern unsigned long __CTOR_LIST__[];
+
+//=========================================================================================
+// defines
+//=========================================================================================
+#define __STARTUP_RUNTIME_COPYTABLE   (runtimeCopyTable_t*)(&__RUNTIME_COPY_TABLE[0])
+#define __STARTUP_RUNTIME_CLEARTABLE  (runtimeClearTable_t*)(&__RUNTIME_CLEAR_TABLE[0])
+#define __STARTUP_RUNTIME_CTORS       (unsigned long*)(&__CTOR_LIST__[0])
+
+#elif defined(__CC_ARM)
+
 //=============================================================================
 // Load region symbols (.data)
 //=============================================================================
@@ -42,6 +79,10 @@ extern unsigned int Image$$ER_RW_DATA$$ZI$$Base;
 extern unsigned int Image$$ER_RW_DATA$$ZI$$Length;
 #define BSS_SECTION_BASE (unsigned int)&Image$$ER_RW_DATA$$ZI$$Base
 #define BSS_SECTION_SIZE (unsigned int)&Image$$ER_RW_DATA$$ZI$$Length
+
+#else
+#error Error: Compiler startup-code dialect is not supported
+#endif
 
 //=============================================================================
 // function prototype
@@ -70,6 +111,15 @@ int main(void)__attribute__((weak));
 #define DISABLE_INTERRUPTS() __asm{CPSID I}
 #else
 #error Error: Compiler inline assembly dialect is not supported
+#endif
+
+void SysStartup_Init(void);
+static void SysStartup_InitRam(void);
+#if defined(__GNUC__) && !defined(__CC_ARM)
+static void SysStartup_InitCtors(void);
+#elif defined(__CC_ARM)
+#else
+#error Error: Compiler startup-code dialect is not supported
 #endif
 
 //-----------------------------------------------------------------------------
@@ -117,6 +167,14 @@ void SysStartup_Init(void)
 
   SysStartup_InitRam();         /* Init .bss and .data sections */
 
+#if defined(__GNUC__) && !defined(__CC_ARM)
+  /* Initialize the non-local C++ objects */
+  SysStartup_InitCtors();
+#elif defined(__CC_ARM)
+#else
+#error Error: Compiler startup-code dialect is not supported
+#endif
+
   SysStartup_RunApplication();  /* Call main function */  
 }
 
@@ -129,7 +187,38 @@ void SysStartup_Init(void)
 //-----------------------------------------------------------------------------
 static void SysStartup_InitRam(void)
 {
-  /* Copie .data from ROM to RAM */
+#if defined(__GNUC__) && !defined(__CC_ARM)
+
+  unsigned long index = 0;
+
+  /* Clear Table */
+  while((__STARTUP_RUNTIME_CLEARTABLE)[index].Addr != (unsigned long)-1 && (__STARTUP_RUNTIME_CLEARTABLE)[index].size != (unsigned long)-1)
+  {
+    for(unsigned int cpt = 0; cpt < (__STARTUP_RUNTIME_CLEARTABLE)[index].size; cpt++)
+    {
+      *(volatile unsigned char*)((unsigned long)((__STARTUP_RUNTIME_CLEARTABLE)[index].Addr) + cpt) = 0;
+    }
+    index++;
+  }
+
+  /* Copy Table */
+  index = 0;
+  while((__STARTUP_RUNTIME_COPYTABLE)[index].sourceAddr != (unsigned long)-1 &&
+        (__STARTUP_RUNTIME_COPYTABLE)[index].targetAddr != (unsigned long)-1 &&
+        (__STARTUP_RUNTIME_COPYTABLE)[index].size       != (unsigned long)-1
+       )
+  {
+    for(unsigned int cpt = 0; cpt < (__STARTUP_RUNTIME_COPYTABLE)[index].size; cpt++)
+    {
+      *(volatile unsigned char*)((unsigned long)((__STARTUP_RUNTIME_COPYTABLE)[index].targetAddr) + cpt) = 
+               *(volatile unsigned char*)((unsigned long)((__STARTUP_RUNTIME_COPYTABLE)[index].sourceAddr) + cpt);
+    }
+    index++;
+  }
+
+#elif defined(__CC_ARM)
+
+  /* Copy .data from ROM to RAM */
   if(ROM_DATA_SECTION_SIZE > 0)
   {
     SysStartup_Memcpy((unsigned char*)ROM_DATA_SECTION_BASE,(const unsigned char*)RAM_DATA_SECTION_BASE,ROM_DATA_SECTION_SIZE);
@@ -140,7 +229,35 @@ static void SysStartup_InitRam(void)
   {
     SysStartup_Memset((unsigned char*)BSS_SECTION_BASE,0,BSS_SECTION_SIZE);
   }
+
+#else
+
+#error Error: Compiler startup-code dialect is not supported
+
+#endif
 }
+
+#if defined(__GNUC__) && !defined(__CC_ARM)
+
+//-----------------------------------------------------------------------------------------
+/// \brief Startup_InitCtors function
+///
+/// \param  void
+///
+/// \return void
+//-----------------------------------------------------------------------------------------
+static void SysStartup_InitCtors(void)
+{
+  for(unsigned long entry = 1; entry <= (__STARTUP_RUNTIME_CTORS)[0]; entry++)
+  {
+    ((void (*)(void))((__STARTUP_RUNTIME_CTORS)[entry]))();
+  }
+}
+
+#elif defined(__CC_ARM)
+#else
+#error Error: Compiler startup-code dialect is not supported
+#endif
 
 //-----------------------------------------------------------------------------
 /// \brief  SysStartup_RunApplication function
