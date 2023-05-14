@@ -1,6 +1,17 @@
 chalandi/OSEK
 ==================
 
+<p align="center">
+    <a href="https://github.com/chalandi/OSEK/actions">
+        <img src="https://github.com/chalandi/OSEK/actions/workflows/OSEK.yml/badge.svg" alt="Build Status"></a>
+    <a href="https://github.com/chalandi/OSEK/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc">
+        <img src="https://custom-icon-badges.herokuapp.com/github/issues-raw/chalandi/OSEK?logo=github" alt="Issues" /></a>
+    <a href="https://github.com/chalandi/OSEK/blob/master/gpl-3.0.txt">
+        <img src="https://img.shields.io/badge/license-GPL%203.0-blue.svg" alt="GNU GENERAL PUBLIC LICENSE 3.0"></a>
+    <a href="https://github.com/chalandi/OSEK">
+        <img src="https://img.shields.io/github/languages/code-size/chalandi/OSEK" alt="GitHub code size in bytes" /></a>
+</p>
+
 This repository implements an OSEK-like, bare-metal
 operating system for ARM(R) Cortex(R)-M3.
 The goal is to achieve near-compatibility with OSEK (ECC1/BCC1).
@@ -14,8 +25,8 @@ Features include:
   - 1ms timebase derived from the ARM(R) `SysTick`.
   - Implementation in C99 with absolute minimal use of assembly.
 
-A clear and easy-to-understand build system based on KEIL MDK
-completes this fun and educational project.
+A clear and easy-to-understand build system based on either free GNUmake/GCC
+or alternatively KEIL MDK completes this fun and educational project.
 
 This repository provides keen insight on writing your own
 _bare_ _metal_ operating system from scratch on a modern
