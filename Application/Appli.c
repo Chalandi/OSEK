@@ -30,8 +30,8 @@ static void Appli_LedInit(void);
 #define TURN_ON_LED_GREEN()   GPIOC_ODR.ODR9 = 1
 #define TURN_OFF_LED_GREEN()  GPIOC_ODR.ODR9 = 0
 
-#define TOGGLE_BLUE_LED()     GPIOC_ODR.ODR8 ^= 1
-#define TOGGLE_GREEN_LED()    GPIOC_ODR.ODR9 ^= 1
+#define TOGGLE_BLUE_LED()     { OS_DisableAllInterrupts(); GPIOC_ODR.ODR8 ^= 1; OS_EnableAllInterrupts(); }
+#define TOGGLE_GREEN_LED()    { OS_DisableAllInterrupts(); GPIOC_ODR.ODR9 ^= 1; OS_EnableAllInterrupts(); }
 
 int main(void)
 {
@@ -54,10 +54,11 @@ static void Appli_LedInit(void)
 
 TASK(T1)
 {
-  const OsEventMaskType OsWaitEventMask = (OsEventMaskType) (EVT_BLINK_BLUE_LED | EVT_BLINK_GREEN_LED);
+  TURN_ON_LED_BLUE();
 
-  (void)OS_SetRelAlarm(ALARM_BLUE_LED, 0,1000);
-  (void)OS_SetRelAlarm(ALARM_GREEN_LED,0, 500);
+  const OsEventMaskType OsWaitEventMask = (OsEventMaskType) EVT_BLINK_BLUE_LED;
+
+  (void)OS_SetRelAlarm(ALARM_BLUE_LED, 0, 997);
 
   for(;;)
   {
@@ -65,18 +66,12 @@ TASK(T1)
 
     if(E_OK == OS_WaitEvent(OsWaitEventMask))
     {
-      (void)OS_GetEvent((OsTaskType)T1, &Events);
+      (void) OS_GetEvent((OsTaskType)T1, &Events);
 
       if((Events & EVT_BLINK_BLUE_LED) == EVT_BLINK_BLUE_LED)
       {
         OS_ClearEvent(EVT_BLINK_BLUE_LED);
         TOGGLE_BLUE_LED();
-      }
-
-      if((Events & EVT_BLINK_GREEN_LED) == EVT_BLINK_GREEN_LED)
-      {
-        OS_ClearEvent(EVT_BLINK_GREEN_LED);
-        TOGGLE_GREEN_LED();
       }
     }
     else
@@ -88,10 +83,26 @@ TASK(T1)
 
 TASK(Idle)
 {
+  TURN_ON_LED_GREEN();
+
+  const OsEventMaskType OsWaitEventMask = (OsEventMaskType) EVT_BLINK_GREEN_LED;
+
+  (void)OS_SetRelAlarm(ALARM_GREEN_LED,0, 503);
+
   for(;;)
   {
-    if(1)
+    OsEventMaskType Events = (OsEventMaskType) 0U;
+
+    if(E_OK == OS_WaitEvent(OsWaitEventMask))
     {
+      (void) OS_GetEvent((OsTaskType)Idle, &Events);
+
+      if((Events & EVT_BLINK_GREEN_LED) == EVT_BLINK_GREEN_LED)
+      {
+        OS_ClearEvent(EVT_BLINK_GREEN_LED);
+
+        TOGGLE_GREEN_LED();
+      }
     }
     else
     {
