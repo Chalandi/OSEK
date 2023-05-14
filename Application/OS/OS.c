@@ -58,9 +58,9 @@ void OS_StartOS(OsAppModeType Mode)
 		{
 			/* Init all stacks with marker 0xAA */
 			const uint32 stack_size = OCB_Cfg.pTcb[tcbIdx]->pstack_top - OCB_Cfg.pTcb[tcbIdx]->pstack_bot + sizeof(uint32);
-			for(int Idx=0;Idx < stack_size;Idx++)
+			for(uint32 Idx=0u;Idx < stack_size;Idx++)
 			{
-				*(uint32*)((OCB_Cfg.pTcb[tcbIdx]->pstack_bot) + Idx) = 0xAAAAAAAA;
+				*(uint32*)((OCB_Cfg.pTcb[tcbIdx]->pstack_bot) + Idx) = (uint32)0xAAAAAAAAu;
 			}
 			
 			/* Set default tasks priorities */
@@ -558,7 +558,7 @@ static void OS_IdleLoop(void)
 ///
 /// \return void
 //------------------------------------------------------------------------------------------------------------------
-void OsRunCat2Isr()
+void OsRunCat2Isr(void)
 {
 	uint32 CurrentPsr = 0;
 	

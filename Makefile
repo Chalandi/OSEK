@@ -20,7 +20,7 @@ OBJ_DIR    = $(CURDIR)/Tmp/Obj
 SRC_DIR    = $(CURDIR)
 
 CC_ERR_FORMAT_SCRIPT = CompilerErrorFormater.py
-LD_SCRIPT            = $(SRC_DIR)/stm32f100.ld
+LD_SCRIPT            = $(SRC_DIR)/Memory_Map.ld
 
 ############################################################################################
 # Toolchain
@@ -92,6 +92,7 @@ LOPS         = -x none                                        \
                -nostdlib                                      \
                -specs=nano.specs                              \
                -specs=nosys.specs                             \
+               -e SysStartup_Init                             \
                $(OPS_BASE)                                    \
                -Wl,--print-memory-usage                       \
                -Wl,-Map,$(OUTPUT_DIR)/OSEK.map                \
@@ -103,6 +104,8 @@ LOPS         = -x none                                        \
 ############################################################################################
 
 SRC_FILES :=  $(SRC_DIR)/Application/Appli                                                 \
+              $(SRC_DIR)/Application/IntVect                                               \
+              $(SRC_DIR)/Application/SysStartup                                            \
               $(SRC_DIR)/Application/MCAL/SysTickTimer                                     \
               $(SRC_DIR)/Application/OS/OS                                                 \
               $(SRC_DIR)/Application/OS/OsAlarm                                            \
