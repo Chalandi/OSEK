@@ -45,8 +45,13 @@ extern void OsCat2IsrWrapper(void);
 void undefinedHandler(void);
 void HardFaultdHandler(void);
 
+#if defined(__GNUC__) && !defined(__CC_ARM)
+#elif defined(__CC_ARM)
 /* Disable the warning D-1296 */
 #pragma diag_suppress 1296
+#else
+#error Error: Compiler startup-code dialect is not supported
+#endif
 
 #if defined(__GNUC__) && !defined(__CC_ARM)
 const volatile unsigned int IntVector[128U] __attribute__((section(".isr_vector")));
@@ -59,7 +64,7 @@ const volatile unsigned int IntVector[128U] __attribute__((section ("INTVECT")))
 const volatile unsigned int IntVector[128U] =
 {
 #if defined(__GNUC__) && !defined(__CC_ARM)
-  __initial_stack_pointer,                   // 0x0000, initial stack pointer
+  (unsigned int)__initial_stack_pointer,     // 0x0000, initial stack pointer
 #elif defined(__CC_ARM)
   (unsigned int)&Image$$ER_STACK$$ZI$$Limit, // 0x0000, initial stack pointer
 #else

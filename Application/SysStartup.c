@@ -133,7 +133,7 @@ static void SysStartup_InitCtors(void);
 //-----------------------------------------------------------------------------
 static void SysStartup_Memset(unsigned char* ptr,int value, unsigned int size)
 {
-  for(int i=0;i<size;i++)
+  for(unsigned int i=0u;i<size;i++)
   {
     *((unsigned char*)(ptr+i)) = value;
   }
@@ -149,7 +149,7 @@ static void SysStartup_Memset(unsigned char* ptr,int value, unsigned int size)
 //-----------------------------------------------------------------------------
 static void SysStartup_Memcpy(unsigned char* target, const unsigned char* source, unsigned int size)
 {
-  for(int i=0;i<size;i++)
+  for(unsigned int i=0u;i<size;i++)
   {
     *((unsigned char*)(target+i)) = *((const unsigned char*)(source+i));
   }
