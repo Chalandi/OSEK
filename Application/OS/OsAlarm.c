@@ -35,16 +35,18 @@
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetAlarmBase(OsAlarmType AlarmID, OsAlarmBaseRefType Info)
 {
-	if(AlarmID < NB_OF_ALARMS)
-	{
-		Info = &OCB_Cfg.pAlarm[AlarmID];
-		return(E_OK);	
-	}
-	else
-	{
-		(void)Info;
-		return(E_OS_ID);
-	}		
+  if(AlarmID < NB_OF_ALARMS)
+  {
+    Info = &OCB_Cfg.pAlarm[AlarmID];
+
+    return(E_OK);
+  }
+  else
+  {
+    (void)Info;
+
+    return(E_OS_ID);
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -59,15 +61,16 @@ OsStatusType OS_GetAlarmBase(OsAlarmType AlarmID, OsAlarmBaseRefType Info)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetAlarm(OsAlarmType AlarmID, OsTickRefType Tick)
 {
-	if(AlarmID < NB_OF_ALARMS)
-	{
-		*Tick = OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint - (uint32)OCB_Cfg.OsSysTickCounter;
-		return(E_OK);	
-	}
-	else
-	{
-		return(E_OS_ID);
-	}		
+  if(AlarmID < NB_OF_ALARMS)
+  {
+    *Tick = OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint - (uint32)OCB_Cfg.OsSysTickCounter;
+
+    return(E_OK);
+  }
+  else
+  {
+    return(E_OS_ID);
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -85,43 +88,43 @@ OsStatusType OS_GetAlarm(OsAlarmType AlarmID, OsTickRefType Tick)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_SetRelAlarm(OsAlarmType AlarmID, OsTickType increment, OsTickType cycle)
 {
-	if(AlarmID < NB_OF_ALARMS)
-	{
-		if(cycle == 0 && increment > 0 && OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_FREE)
-		{
-			/* One shot alarm */
-			OCB_Cfg.pAlarm[AlarmID]->Alarmtype       = ALARM_ONE_SHOT;
-			OCB_Cfg.pAlarm[AlarmID]->AlarmCategory   = ALARM_RELATIVE;
-			OCB_Cfg.pAlarm[AlarmID]->InitCycles      = 0;
-			OCB_Cfg.pAlarm[AlarmID]->InitTicks       = increment;
-			OCB_Cfg.pAlarm[AlarmID]->Status          = ALARM_BUSY;
-			OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = increment + (uint32)OCB_Cfg.OsSysTickCounter;
-			return(E_OK);				
-		}
-		else if (cycle != 0 &&  cycle >= increment && OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_FREE)
-		{
-			/* Cyclic alarm */
-			OCB_Cfg.pAlarm[AlarmID]->Alarmtype       = ALARM_CYCLIC;
-			OCB_Cfg.pAlarm[AlarmID]->AlarmCategory   = ALARM_RELATIVE;			
-			OCB_Cfg.pAlarm[AlarmID]->InitCycles      = cycle;
-			OCB_Cfg.pAlarm[AlarmID]->InitTicks       = increment;
-			OCB_Cfg.pAlarm[AlarmID]->Status          = ALARM_BUSY;
-			OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = increment + cycle + (uint32)OCB_Cfg.OsSysTickCounter;
-			return(E_OK);				
-		}
-		else if(OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_BUSY)
-		{
-			return(E_OS_STATE);
-		}
-		else
-		{
-			return(E_OS_VALUE);
-		}
-	}
-	else
-	{
-		return(E_OS_ID);
-	}
+  if(AlarmID < NB_OF_ALARMS)
+  {
+    if(cycle == 0 && increment > 0 && OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_FREE)
+    {
+      /* One shot alarm */
+      OCB_Cfg.pAlarm[AlarmID]->Alarmtype       = ALARM_ONE_SHOT;
+      OCB_Cfg.pAlarm[AlarmID]->AlarmCategory   = ALARM_RELATIVE;
+      OCB_Cfg.pAlarm[AlarmID]->InitCycles      = 0;
+      OCB_Cfg.pAlarm[AlarmID]->InitTicks       = increment;
+      OCB_Cfg.pAlarm[AlarmID]->Status          = ALARM_BUSY;
+      OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = increment + (uint32)OCB_Cfg.OsSysTickCounter;
+      return(E_OK);
+    }
+    else if (cycle != 0 &&  cycle >= increment && OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_FREE)
+    {
+      /* Cyclic alarm */
+      OCB_Cfg.pAlarm[AlarmID]->Alarmtype       = ALARM_CYCLIC;
+      OCB_Cfg.pAlarm[AlarmID]->AlarmCategory   = ALARM_RELATIVE;      
+      OCB_Cfg.pAlarm[AlarmID]->InitCycles      = cycle;
+      OCB_Cfg.pAlarm[AlarmID]->InitTicks       = increment;
+      OCB_Cfg.pAlarm[AlarmID]->Status          = ALARM_BUSY;
+      OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = increment + cycle + (uint32)OCB_Cfg.OsSysTickCounter;
+      return(E_OK);
+    }
+    else if(OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_BUSY)
+    {
+      return(E_OS_STATE);
+    }
+    else
+    {
+      return(E_OS_VALUE);
+    }
+  }
+  else
+  {
+    return(E_OS_ID);
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -139,43 +142,43 @@ OsStatusType OS_SetRelAlarm(OsAlarmType AlarmID, OsTickType increment, OsTickTyp
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_SetAbsAlarm(OsAlarmType AlarmID, OsTickType start, OsTickType cycle)
 {
-	if(AlarmID < NB_OF_ALARMS)
-	{
-		if(cycle == 0 && start > (uint32)OCB_Cfg.OsSysTickCounter && OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_FREE)
-		{
-			/* One shot alarm */
-			OCB_Cfg.pAlarm[AlarmID]->Alarmtype       = ALARM_ONE_SHOT;
-			OCB_Cfg.pAlarm[AlarmID]->AlarmCategory   = ALARM_ABSOLUTE;			
-			OCB_Cfg.pAlarm[AlarmID]->InitCycles      = 0;
-			OCB_Cfg.pAlarm[AlarmID]->InitTicks       = start;
-			OCB_Cfg.pAlarm[AlarmID]->Status          = ALARM_BUSY;
-			OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = start;
-			return(E_OK);				
-		}
-		else if (cycle != 0 &&  start > (uint32)OCB_Cfg.OsSysTickCounter && OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_FREE)
-		{
-			/* Cyclic alarm */
-			OCB_Cfg.pAlarm[AlarmID]->Alarmtype       = ALARM_CYCLIC;
-			OCB_Cfg.pAlarm[AlarmID]->AlarmCategory   = ALARM_ABSOLUTE;			
-			OCB_Cfg.pAlarm[AlarmID]->InitCycles      = cycle;
-			OCB_Cfg.pAlarm[AlarmID]->InitTicks       = start;
-			OCB_Cfg.pAlarm[AlarmID]->Status          = ALARM_BUSY;
-			OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = start;
-			return(E_OK);				
-		}
-		else if(OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_BUSY)
-		{
-			return(E_OS_STATE);
-		}
-		else
-		{
-			return(E_OS_VALUE);
-		}
-	}
-	else
-	{
-		return(E_OS_ID);
-	}
+  if(AlarmID < NB_OF_ALARMS)
+  {
+    if(cycle == 0 && start > (uint32)OCB_Cfg.OsSysTickCounter && OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_FREE)
+    {
+      /* One shot alarm */
+      OCB_Cfg.pAlarm[AlarmID]->Alarmtype       = ALARM_ONE_SHOT;
+      OCB_Cfg.pAlarm[AlarmID]->AlarmCategory   = ALARM_ABSOLUTE;
+      OCB_Cfg.pAlarm[AlarmID]->InitCycles      = 0;
+      OCB_Cfg.pAlarm[AlarmID]->InitTicks       = start;
+      OCB_Cfg.pAlarm[AlarmID]->Status          = ALARM_BUSY;
+      OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = start;
+      return(E_OK);
+    }
+    else if (cycle != 0 &&  start > (uint32)OCB_Cfg.OsSysTickCounter && OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_FREE)
+    {
+      /* Cyclic alarm */
+      OCB_Cfg.pAlarm[AlarmID]->Alarmtype       = ALARM_CYCLIC;
+      OCB_Cfg.pAlarm[AlarmID]->AlarmCategory   = ALARM_ABSOLUTE;
+      OCB_Cfg.pAlarm[AlarmID]->InitCycles      = cycle;
+      OCB_Cfg.pAlarm[AlarmID]->InitTicks       = start;
+      OCB_Cfg.pAlarm[AlarmID]->Status          = ALARM_BUSY;
+      OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = start;
+      return(E_OK);
+    }
+    else if(OCB_Cfg.pAlarm[AlarmID]->Status == ALARM_BUSY)
+    {
+      return(E_OS_STATE);
+    }
+    else
+    {
+      return(E_OS_VALUE);
+    }
+  }
+  else
+  {
+    return(E_OS_ID);
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -189,15 +192,14 @@ OsStatusType OS_SetAbsAlarm(OsAlarmType AlarmID, OsTickType start, OsTickType cy
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_CancelAlarm(OsAlarmType AlarmID)
 {
-	if(AlarmID < NB_OF_ALARMS)
-	{
-			OCB_Cfg.pAlarm[AlarmID]->Status          = ALARM_FREE;
-			OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = 0;
-			return(E_OK);		
-	}
-	else
-	{
-		return(E_OS_ID);
-	}	
+  if(AlarmID < NB_OF_ALARMS)
+  {
+      OCB_Cfg.pAlarm[AlarmID]->Status          = ALARM_FREE;
+      OCB_Cfg.pAlarm[AlarmID]->AlarmCheckPoint = 0;
+      return(E_OK);
+  }
+  else
+  {
+    return(E_OS_ID);
+  }
 }
-

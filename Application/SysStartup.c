@@ -89,8 +89,13 @@ extern unsigned int Image$$ER_RW_DATA$$ZI$$Length;
 //=============================================================================
 void SysStartup_Init(void);
 static void SysStartup_InitRam(void);
+#if defined(__GNUC__) && !defined(__CC_ARM)
+#elif defined(__CC_ARM)
 static void SysStartup_Memset(unsigned char* ptr,int value, unsigned int size);
 static void SysStartup_Memcpy(unsigned char* target, const unsigned char* source, unsigned int size);
+#else
+#error Error: Compiler startup-code dialect is not supported
+#endif
 static void SysStartup_RunApplication(void);
 static void SysStartup_Unexpected_Exit(void);
 static void SysStartup_InitSystemClock(void);
@@ -122,6 +127,8 @@ static void SysStartup_InitCtors(void);
 #error Error: Compiler startup-code dialect is not supported
 #endif
 
+#if defined(__GNUC__) && !defined(__CC_ARM)
+#elif defined(__CC_ARM)
 //-----------------------------------------------------------------------------
 /// \brief  Memset function
 ///
@@ -154,6 +161,10 @@ static void SysStartup_Memcpy(unsigned char* target, const unsigned char* source
     *((unsigned char*)(target+i)) = *((const unsigned char*)(source+i));
   }
 }
+#else
+#error Error: Compiler startup-code dialect is not supported
+#endif
+
 //-----------------------------------------------------------------------------
 /// \brief  SysStartup_Init function
 ///
@@ -305,7 +316,6 @@ static void SysStartup_InitSystemClock(void)
   #define RCC_BASE 0x40021000UL
   #define RCC_CR  (*((volatile unsigned int *)(RCC_BASE + 0x00u)))
   #define RCC_CFG (*((volatile unsigned int *)(RCC_BASE + 0x04u)))
-  #define RCC_APB2RSTR (*((volatile unsigned int *)(RCC_BASE + 0x0Cu)))
   #define RCC_APB2ENR (*((volatile unsigned int *)(RCC_BASE + 0x18u)))
 
   /* Setup the PLL prescaler to x6 (max 24 MHz) */
@@ -317,15 +327,6 @@ static void SysStartup_InitSystemClock(void)
   /* Set PLL (24 MHz) as system clock */
   RCC_CFG |= 0x00000002UL;
 
-  /* Enable the Clock for GPIO Port A */
-  RCC_APB2ENR |= (1<<2);
-
   /* Enable the Clock for GPIO Port C */
   RCC_APB2ENR |= (1<<4);
-
-  /* Enable the Clock for alternate function */
-  RCC_APB2ENR |= (1<<0);
-
- /* Enable the Clock for USART1 */
-  RCC_APB2ENR |= (1<<14);
 }

@@ -1,7 +1,7 @@
 // *****************************************************************************
 // Filename    : OsTypes.h
 // 
-// OS          : OSEK 2.2.3  
+// OS          : OSEK 2.2.3
 // 
 // CC          : ECC1/BCC1
 //
@@ -23,33 +23,31 @@
 #include"types.h"
 #include"HwPltfm.h"
 
-typedef enum 
+typedef enum
 {
-	PRE_READY,
-	READY,
-	WAITING,
-	RUNNING,
-	SUSPENDED,
-	INVALID_STATE
+  PRE_READY,
+  READY,
+  WAITING,
+  RUNNING,
+  SUSPENDED,
+  INVALID_STATE
 }OsTaskStateType;
 
-
-typedef enum 
+typedef enum
 {
-	BASIC,
-	EXTENDED
+  BASIC,
+  EXTENDED
 }OsTasksType;
 
-typedef enum 
+typedef enum
 {
-	NONE_PREEMPT,
-	FULL_PREEMPT
+  NONE_PREEMPT,
+  FULL_PREEMPT
 }OsTasksSchedType;
 
-
-typedef enum 
+typedef enum
 {
-	E_OK                       = 0,
+  E_OK                       = 0,
   E_OS_ACCESS                = 1,
   E_OS_CALLEVEL              = 2,
   E_OS_ID                    = 3,
@@ -77,28 +75,28 @@ typedef enum
 
 typedef enum
 {
-	ALARM_SET_EVENT,
-	ALARM_ACTIVE_TASK,
-	ALARM_CALLBACK
-	
+  ALARM_SET_EVENT,
+  ALARM_ACTIVE_TASK,
+  ALARM_CALLBACK
+  
 }OsAlarmAction;
 
 typedef enum
 {
-	ALARM_FREE,
-	ALARM_BUSY
+  ALARM_FREE,
+  ALARM_BUSY
 }AlarmStatus;
 
 typedef enum
 {
-	ALARM_ONE_SHOT,
-	ALARM_CYCLIC
+  ALARM_ONE_SHOT,
+  ALARM_CYCLIC
 }AlarmTypes;
 
 typedef enum
 {
-	ALARM_RELATIVE,
-	ALARM_ABSOLUTE
+  ALARM_RELATIVE,
+  ALARM_ABSOLUTE
 }AlarmCatgys;
 
 /* OS TYPES */
@@ -117,42 +115,42 @@ typedef OsTickType* OsTickRefType;
 
 typedef struct
 {
-	const pTaskFunc   function;
-	const uint32      FixedPrio;
-	const uint32      Autostart;
-	const uint32      pstack_top;
-	const uint32      pstack_bot;
+  const pTaskFunc   function;
+  const uint32      FixedPrio;
+  const uint32      Autostart;
+  const uint32      pstack_top;
+  const uint32      pstack_bot;
   uint32            pCurrentStackPointer;
   OsTaskStateType   TaskStatus;
-  uint32            Prio;	
-  uint32            CeilingPrio;	
-	uint32            SetEvtMask;
-	uint32            WaitEvtMask;
-	uint32            NbOfActiv;
-	OsTasksType       TaskType;
-	OsTasksSchedType  TaskSchedType;
+  uint32            Prio;  
+  uint32            CeilingPrio;  
+  uint32            SetEvtMask;
+  uint32            WaitEvtMask;
+  uint32            NbOfActiv;
+  OsTasksType       TaskType;
+  OsTasksSchedType  TaskSchedType;
 }Tcb_t;
 
 typedef struct
 {
-	OsTickType             InitTicks;
-	OsTickType             InitCycles;
-	const OsEventMaskType  Event;
-	const OsTaskType       TaskId;
-	const OsAlarmAction    Action;
+  OsTickType             InitTicks;
+  OsTickType             InitCycles;
+  const OsEventMaskType  Event;
+  const OsTaskType       TaskId;
+  const OsAlarmAction    Action;
   const uint32           AutoStart;
   AlarmStatus            Status;
   AlarmTypes             Alarmtype;
-  AlarmCatgys            AlarmCategory;	
-	OsTickType             AlarmCheckPoint;
-	pTaskFunc              CallBackFunc;
+  AlarmCatgys            AlarmCategory;
+  OsTickType             AlarmCheckPoint;
+  pTaskFunc              CallBackFunc;
 }Alarm_t;
 
 typedef struct
 {
-	const uint32 ResCeilingPrio;
-	uint32 CurrentOccupiedTask;
-	const uint32* AuthorizedTask;
+  const uint32 ResCeilingPrio;
+  uint32 CurrentOccupiedTask;
+  const uint32* AuthorizedTask;
 }Resource_t;
 
 typedef Alarm_t** OsAlarmBaseRefType;
@@ -160,16 +158,16 @@ typedef Alarm_t** OsAlarmBaseRefType;
 typedef struct
 {
   Tcb_t**       pTcb;
-  Alarm_t**     pAlarm;	
-	Resource_t**  pRes;
-	uint32        HighPrioReadyTaskIdx;	
+  Alarm_t**     pAlarm;
+  Resource_t**  pRes;
+  uint32        HighPrioReadyTaskIdx;
   uint32        CurrentTaskIdx;
-	uint64        OsSysTickCounter;
-	uint32        OsIsrCallDispatcher;
-	uint32        OsLockDispatcher;
-	uint32        OsIsrInterruptLevel;
-	uint32        OsSystemStackPtr;
-	uint32        OsCurrentSystemStackPtr;
+  uint64        OsSysTickCounter;
+  uint32        OsIsrCallDispatcher;
+  uint32        OsLockDispatcher;
+  uint32        OsIsrInterruptLevel;
+  uint32        OsSystemStackPtr;
+  uint32        OsCurrentSystemStackPtr;
 }Ocb_t;
 
 typedef struct
@@ -179,12 +177,12 @@ typedef struct
 }Isr_t;
 
 #define TASK(x) void Task##x##Func(void)
-#define ISR(x)  void Os##x##Isr(void)	
+#define ISR(x)  void Os##x##Isr(void)
 #define pTASK(x) &Task##x##Func
-#define STACK(x,y) uint32 Stack_T_##x[(y/4)]; const uint32 Stack_T_##x##_Size = y 
+#define STACK(x,y) uint32 Stack_T_##x[(y/4)]; const uint32 Stack_T_##x##_Size = y
 #define TSTACK(x) (uint32)(&Stack_T_##x[((Stack_T_##x##_Size)/4)-1])
 #define BSTACK(x) (uint32)(&Stack_T_##x[0])
-	
+
 #define OS_DeclareTask(TaskId)
 #define OS_DeclareResource(ResId)
 #define OS_DeclareEvent(Event)
@@ -200,4 +198,3 @@ typedef struct
 #define APP_MODE APP_MODE_DEFAULT
 
 #endif
-
