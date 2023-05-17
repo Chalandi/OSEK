@@ -35,8 +35,8 @@
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetTaskID(OsTaskRefType TaskID)
 {
-	*TaskID = OCB_Cfg.CurrentTaskIdx;
-	return(E_OK);
+  *TaskID = OCB_Cfg.CurrentTaskIdx;
+  return(E_OK);
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -51,20 +51,20 @@ OsStatusType OS_GetTaskID(OsTaskRefType TaskID)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetTaskState(OsTaskType TaskID, OsTaskStateRefType State)
 {
-	if(TaskID < NB_OF_TASKS)
-	{
-		*State = OCB_Cfg.pTcb[TaskID]->TaskStatus;
+  if(TaskID < NB_OF_TASKS)
+  {
+    *State = OCB_Cfg.pTcb[TaskID]->TaskStatus;
 
     if(*State == PRE_READY)
-		{
-			*State = READY; /* Change PRE_READY to READY to be conform to OSEK SPEC */
-		}
-		return(E_OK);
-	}
-	else
-	{
-		return(E_OS_ID);
-	}
+    {
+      *State = READY; /* Change PRE_READY to READY to be conform to OSEK SPEC */
+    }
+    return(E_OK);
+  }
+  else
+  {
+    return(E_OS_ID);
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -79,41 +79,40 @@ OsStatusType OS_GetTaskState(OsTaskType TaskID, OsTaskStateRefType State)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_ActivateTask(OsTaskType TaskID)
 {
-	if(TaskID < NB_OF_TASKS)
-	{
-		if(OCB_Cfg.pTcb[TaskID]->TaskStatus == SUSPENDED && OCB_Cfg.pTcb[TaskID]->NbOfActiv > 0)
-		{
-			OCB_Cfg.pTcb[TaskID]->TaskStatus = PRE_READY;
-			
-			OCB_Cfg.pTcb[TaskID]->NbOfActiv--;
-			
-	      if(OCB_Cfg.CurrentTaskIdx < NB_OF_TASKS)
-				{
-					if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskSchedType == FULL_PREEMPT)
-					{
-						/* Call the scheduler */
-						(void)OS_Schedule();
-					}
-			  }
-				else
-				{
-					/* No active task, CPU will execute the function OS_IdleLoop */
-					/* Call the scheduler to switch the context to OS_IdleLoop   */
-					(void)OS_Schedule();					
-				}				
-			
-			return(E_OK);
-		}
-		else
-		{
-			return(E_OS_LIMIT);
-		}
+  if(TaskID < NB_OF_TASKS)
+  {
+    if(OCB_Cfg.pTcb[TaskID]->TaskStatus == SUSPENDED && OCB_Cfg.pTcb[TaskID]->NbOfActiv > 0)
+    {
+      OCB_Cfg.pTcb[TaskID]->TaskStatus = PRE_READY;
 
-	}
-	else
-	{
-		return(E_OS_ID);
-	}
+      OCB_Cfg.pTcb[TaskID]->NbOfActiv--;
+
+      if(OCB_Cfg.CurrentTaskIdx < NB_OF_TASKS)
+      {
+        if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskSchedType == FULL_PREEMPT)
+        {
+          /* Call the scheduler */
+          (void)OS_Schedule();
+        }
+      }
+      else
+      {
+        /* No active task, CPU will execute the function OS_IdleLoop */
+        /* Call the scheduler to switch the context to OS_IdleLoop   */
+        (void)OS_Schedule();
+      }
+
+      return(E_OK);
+    }
+    else
+    {
+      return(E_OS_LIMIT);
+    }
+  }
+  else
+  {
+    return(E_OS_ID);
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -128,25 +127,25 @@ OsStatusType OS_ActivateTask(OsTaskType TaskID)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_TerminateTask(void)
 {
-	if(	OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio != 0 &&
-			OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio != OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->FixedPrio)
-	{
-		return(E_OS_RESOURCE);
-	}
-	else if(TRUE == OsIsInterruptContext())
-	{
-		return(E_OS_CALLEVEL);
-	} 	
-	else
-	{
-		/* Set the new task state */
-		OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = SUSPENDED;
-		
-		/* Call the scheduler */
-		(void)OS_Schedule();
-		
-		return(E_OK);
-	}	
+  if(  OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio != 0 &&
+      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio != OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->FixedPrio)
+  {
+    return(E_OS_RESOURCE);
+  }
+  else if(TRUE == OsIsInterruptContext())
+  {
+    return(E_OS_CALLEVEL);
+  }
+  else
+  {
+    /* Set the new task state */
+    OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = SUSPENDED;
+
+    /* Call the scheduler */
+    (void)OS_Schedule();
+
+    return(E_OK);
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -163,35 +162,33 @@ OsStatusType OS_TerminateTask(void)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_ChainTask(OsTaskType TaskID)
 {
-	if(	OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio != 0 &&
-			OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio != OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->FixedPrio)
-	{
-		return(E_OS_RESOURCE);
-	}
-	else if(TRUE == OsIsInterruptContext())
-	{
-		return(E_OS_CALLEVEL);
-	} 
-	else if(OCB_Cfg.pTcb[TaskID]->NbOfActiv == 0)
-	{
-		return(E_OS_LIMIT);
-	}	
-	else if(TaskID >= NB_OF_TASKS)
-	{
-		return(E_OS_ID);
-	}
-	else
-	{
-		OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = SUSPENDED;
-		
-		OCB_Cfg.pTcb[TaskID]->TaskStatus = PRE_READY;
-		
-		OCB_Cfg.pTcb[TaskID]->NbOfActiv--;
-		
-		(void)OS_Schedule();
-		
-		return(E_OK);
-	}	
+  if(  OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio != 0 &&
+      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio != OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->FixedPrio)
+  {
+    return(E_OS_RESOURCE);
+  }
+  else if(TRUE == OsIsInterruptContext())
+  {
+    return(E_OS_CALLEVEL);
+  }
+  else if(OCB_Cfg.pTcb[TaskID]->NbOfActiv == 0)
+  {
+    return(E_OS_LIMIT);
+  }
+  else if(TaskID >= NB_OF_TASKS)
+  {
+    return(E_OS_ID);
+  }
+  else
+  {
+    OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = SUSPENDED;
+
+    OCB_Cfg.pTcb[TaskID]->TaskStatus = PRE_READY;
+
+    OCB_Cfg.pTcb[TaskID]->NbOfActiv--;
+
+    (void)OS_Schedule();
+
+    return(E_OK);
+  }
 }
-
-
