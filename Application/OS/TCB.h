@@ -33,11 +33,8 @@
 #include"OsCfg.h"
 #undef OS_GEN_FUNC_PROTO
 
-
-
 /* OS Config */
 extern volatile Ocb_t OCB_Cfg;
-
 
 #define STARTUPHOOK   0
 #define ERRORHOOK     0
@@ -45,7 +42,7 @@ extern volatile Ocb_t OCB_Cfg;
 #define PRETASKHOOK   0
 #define POSTTASKHOOK  0
 
-#define RES_SCHEDULER_PRIO (uint32)0x7FFFFFFF
-#define RES_TRACE_PRIO     (uint32)1
+#define RES_SCHEDULER_PRIO (uint32)0x7FFFFFFFu
+#define RES_TRACE_PRIO     (uint32)1u
 
 #endif

@@ -35,33 +35,32 @@
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetResource(OsResourceType ResID)
 {
-	if(ResID < NB_OF_RESOURCE)
-	{
-		if(OCB_Cfg.pRes[ResID]->AuthorizedTask[OCB_Cfg.CurrentTaskIdx] == 1 && 
+  if(ResID < NB_OF_RESOURCE)
+  {
+    if(OCB_Cfg.pRes[ResID]->AuthorizedTask[OCB_Cfg.CurrentTaskIdx] == 1 &&
        OCB_Cfg.pRes[ResID]->CurrentOccupiedTask == INVALID_TASK)
-		{
-			/* The resource is available */
+    {
+      /* The resource is available */
 
-			/* reserve the resource to the current task */
-			OCB_Cfg.pRes[ResID]->CurrentOccupiedTask = OCB_Cfg.CurrentTaskIdx;
+      /* reserve the resource to the current task */
+      OCB_Cfg.pRes[ResID]->CurrentOccupiedTask = OCB_Cfg.CurrentTaskIdx;
 
-			/* Set the ceilling prio of the resource to the current task */
-			OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio = OCB_Cfg.pRes[ResID]->ResCeilingPrio;
-			OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio = OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio;
+      /* Set the ceilling prio of the resource to the current task */
+      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio = OCB_Cfg.pRes[ResID]->ResCeilingPrio;
+      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio = OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio;
 
       return(E_OK);
-		}
-		else
-		{
-			/* Resource is occupied by another task */
-			return(E_OS_ACCESS);
-		}
-				
-	}
+    }
+    else
+    {
+      /* Resource is occupied by another task */
+      return(E_OS_ACCESS);
+    }
+  }
   else
-	{
-		return(E_OS_ID);
-  }			
+  {
+    return(E_OS_ID);
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -76,44 +75,43 @@ OsStatusType OS_GetResource(OsResourceType ResID)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_ReleaseResource(OsResourceType ResID)
 {
-	if(ResID < NB_OF_RESOURCE)
-	{
-		if(OCB_Cfg.pRes[ResID]->CurrentOccupiedTask == OCB_Cfg.CurrentTaskIdx)
-		{
-			/* Release the resource */
-			OCB_Cfg.pRes[ResID]->CurrentOccupiedTask = INVALID_TASK;
-			
-			/* Set the default prio to the current task */
-			OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio = 0;
-			OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio = OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->FixedPrio;
+  if(ResID < NB_OF_RESOURCE)
+  {
+    if(OCB_Cfg.pRes[ResID]->CurrentOccupiedTask == OCB_Cfg.CurrentTaskIdx)
+    {
+      /* Release the resource */
+      OCB_Cfg.pRes[ResID]->CurrentOccupiedTask = INVALID_TASK;
 
-			
-	      if(OCB_Cfg.CurrentTaskIdx < NB_OF_TASKS)
-				{
-					if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskSchedType == FULL_PREEMPT)
-					{
-						/* Call the scheduler */
-						(void)OS_Schedule();
-					}
-			    }
-				else
-				{
-					/* No active task, system in Idle state (OS_IdleLoop) */
-					/* Call the scheduler */
-					(void)OS_Schedule();					
-				}				
-			
-			return(E_OK);
-		}
-		else
-		{
-			return(E_OS_NOFUNC);
-		}	
-	}
+      /* Set the default prio to the current task */
+      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio = 0;
+      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio = OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->FixedPrio;
+
+      if(OCB_Cfg.CurrentTaskIdx < NB_OF_TASKS)
+      {
+        if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskSchedType == FULL_PREEMPT)
+        {
+          /* Call the scheduler */
+          (void)OS_Schedule();
+        }
+      }
+      else
+      {
+        /* No active task, system in Idle state (OS_IdleLoop) */
+        /* Call the scheduler */
+        (void)OS_Schedule();
+      }
+
+      return(E_OK);
+    }
+    else
+    {
+      return(E_OS_NOFUNC);
+    }
+  }
   else
-	{
-		return(E_OS_ID);
-  }	
+  {
+    return(E_OS_ID);
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -130,47 +128,48 @@ OsStatusType OS_ReleaseResource(OsResourceType ResID)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask)
 {
-	if(OCB_Cfg.pTcb[TaskID]->TaskType == BASIC)
-	{
-		return(E_OS_ACCESS);
-	}
-	else if(TaskID >= NB_OF_TASKS)
-	{
-		return(E_OS_ID);
-	}
-	else if(OCB_Cfg.pTcb[TaskID]->TaskStatus == SUSPENDED)
-	{
-		return(E_OS_STATE);
-	}	
-	else
-	{
-		OCB_Cfg.pTcb[TaskID]->SetEvtMask |= Mask;
-		
-		if(OCB_Cfg.pTcb[TaskID]->TaskStatus == WAITING)
-		{
-			if((OCB_Cfg.pTcb[TaskID]->SetEvtMask & OCB_Cfg.pTcb[TaskID]->WaitEvtMask) != 0)
-			{	
-				/* Switch state to Ready */
-				OCB_Cfg.pTcb[TaskID]->TaskStatus = READY;
-				
-				if(OCB_Cfg.CurrentTaskIdx < NB_OF_TASKS)
-				{
-					if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskSchedType == FULL_PREEMPT)
-					{
-						/* Call the scheduler */
-						(void)OS_Schedule();
-					}
-			    }
-				else
-				{
-					/* No active task, system in Idle state (OS_IdleLoop) */
-					/* Call the scheduler */
-					(void)OS_Schedule();					
-				}				
-			}
-		}
-		return(E_OK);
-	}
+  if(OCB_Cfg.pTcb[TaskID]->TaskType == BASIC)
+  {
+    return(E_OS_ACCESS);
+  }
+  else if(TaskID >= NB_OF_TASKS)
+  {
+    return(E_OS_ID);
+  }
+  else if(OCB_Cfg.pTcb[TaskID]->TaskStatus == SUSPENDED)
+  {
+    return(E_OS_STATE);
+  }
+  else
+  {
+    OCB_Cfg.pTcb[TaskID]->SetEvtMask |= Mask;
+
+    if(OCB_Cfg.pTcb[TaskID]->TaskStatus == WAITING)
+    {
+      if((OCB_Cfg.pTcb[TaskID]->SetEvtMask & OCB_Cfg.pTcb[TaskID]->WaitEvtMask) != 0)
+      {
+        /* Switch state to Ready */
+        OCB_Cfg.pTcb[TaskID]->TaskStatus = READY;
+
+        if(OCB_Cfg.CurrentTaskIdx < NB_OF_TASKS)
+        {
+          if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskSchedType == FULL_PREEMPT)
+          {
+            /* Call the scheduler */
+            (void)OS_Schedule();
+          }
+        }
+        else
+        {
+          /* No active task, system in Idle state (OS_IdleLoop) */
+          /* Call the scheduler */
+          (void)OS_Schedule();
+        }
+      }
+    }
+
+    return(E_OK);
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -184,19 +183,20 @@ OsStatusType OS_SetEvent(OsTaskType TaskID, OsEventMaskType Mask)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_ClearEvent(OsEventMaskType Mask)
 {
-	if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskType == BASIC)
-	{
-		return(E_OS_ACCESS);
-	}
-	else if(TRUE == OsIsInterruptContext())
-	{
-		return(E_OS_CALLEVEL);
-	}	
-	else
-	{
-		OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->SetEvtMask &=(OsEventMaskType)(~Mask);
-		return(E_OK);
-	}
+  if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskType == BASIC)
+  {
+    return(E_OS_ACCESS);
+  }
+  else if(TRUE == OsIsInterruptContext())
+  {
+    return(E_OS_CALLEVEL);
+  }
+  else
+  {
+    OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->SetEvtMask &=(OsEventMaskType)(~Mask);
+
+    return(E_OK);
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -212,23 +212,23 @@ OsStatusType OS_ClearEvent(OsEventMaskType Mask)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event)
 {
-	if(OCB_Cfg.pTcb[TaskID]->TaskType == BASIC)
-	{
-		return(E_OS_ACCESS);
-	}
-	else if(TaskID >= NB_OF_TASKS)
-	{
-		return(E_OS_ID);
-	}
-	else if(OCB_Cfg.pTcb[TaskID]->TaskStatus == SUSPENDED)
-	{
-		return(E_OS_STATE);
-	}	
-	else
-	{
-		*Event = OCB_Cfg.pTcb[TaskID]->SetEvtMask;
-		return(E_OK);		
-	}	
+  if(OCB_Cfg.pTcb[TaskID]->TaskType == BASIC)
+  {
+    return(E_OS_ACCESS);
+  }
+  else if(TaskID >= NB_OF_TASKS)
+  {
+    return(E_OS_ID);
+  }
+  else if(OCB_Cfg.pTcb[TaskID]->TaskStatus == SUSPENDED)
+  {
+    return(E_OS_STATE);
+  }
+  else
+  {
+    *Event = OCB_Cfg.pTcb[TaskID]->SetEvtMask;
+    return(E_OK);
+  }
 }
 
 //------------------------------------------------------------------------------------------------------------------
@@ -243,43 +243,42 @@ OsStatusType OS_GetEvent(OsTaskType TaskID, OsEventMaskRefType Event)
 //------------------------------------------------------------------------------------------------------------------
 OsStatusType OS_WaitEvent(OsEventMaskType Mask)
 {
-	if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio != 0 || OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio != OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->FixedPrio)
-	{
-	#if(ERRORHOOK)
-		ErrorHook(E_OS_RESOURCE);
-	#endif		
-		return(E_OS_RESOURCE);
-	}
+  if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->CeilingPrio != 0 || OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->Prio != OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->FixedPrio)
+  {
+  #if(ERRORHOOK)
+    ErrorHook(E_OS_RESOURCE);
+  #endif
+    return(E_OS_RESOURCE);
+  }
   else if(OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskType == BASIC)
-	{
-	#if(ERRORHOOK)
-		ErrorHook(E_OS_ACCESS);
-	#endif		
-		return(E_OS_ACCESS);
-	}
-	else if(TRUE == OsIsInterruptContext())
-	{
-	#if(ERRORHOOK)
-		ErrorHook(E_OS_CALLEVEL);
-	#endif	
-		return(E_OS_CALLEVEL);
-	} 	
-	else
-	{	
-		/* Store the new event mask*/
-		OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->WaitEvtMask = Mask;
-		
-		/* Check if the event waiting for is already set */
-		if((OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->SetEvtMask & OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->WaitEvtMask) == 0)
-		{
-			/* event not present -> set current task to waiting */
-			OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = WAITING;
-			
-			/* Call the scheduler */
-			(void)OS_Schedule();	
-		}		
-		
-		return(E_OK);
-	}
+  {
+  #if(ERRORHOOK)
+    ErrorHook(E_OS_ACCESS);
+  #endif
+    return(E_OS_ACCESS);
+  }
+  else if(TRUE == OsIsInterruptContext())
+  {
+  #if(ERRORHOOK)
+    ErrorHook(E_OS_CALLEVEL);
+  #endif
+    return(E_OS_CALLEVEL);
+  }
+  else
+  {
+    /* Store the new event mask*/
+    OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->WaitEvtMask = Mask;
+
+    /* Check if the event waiting for is already set */
+    if((OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->SetEvtMask & OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->WaitEvtMask) == 0)
+    {
+      /* event not present -> set current task to waiting */
+      OCB_Cfg.pTcb[OCB_Cfg.CurrentTaskIdx]->TaskStatus = WAITING;
+
+      /* Call the scheduler */
+      (void)OS_Schedule();
+    }
+
+    return(E_OK);
+  }
 }
-			

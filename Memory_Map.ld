@@ -18,6 +18,11 @@ ELF Entrypoint
 ******************************************************************************************/
 ENTRY(SysStartup_Init)
 
+INPUT(libc.a libgcc.a)
+
+OUTPUT_FORMAT("elf32-littlearm", "elf32-littlearm", "elf32-littlearm")
+OUTPUT_ARCH(arm)
+
 /******************************************************************************************
  Internal flash configuration
 ******************************************************************************************/
@@ -48,18 +53,23 @@ SECTIONS
   /* Program code (text) */
   .text :
   {
+    *(.progmem*)
+    . = ALIGN(4);
     *(.text)
     . = ALIGN(4);
-  } > ROM
-
-  /* Read-only data (.rodata) */
-  .rodata :
-  {
+    *(.text*)
+    . = ALIGN(4);
     *(.rodata)
+    . = ALIGN(4);
+    *(.rodata*)
+    . = ALIGN(4);
+    *(.glue_7)
+    . = ALIGN(4);
+    *(.glue_7t)
     . = ALIGN(4);
   } > ROM
 
- /* Section for constructors */
+  /* Section for constructors */
   .ctors :
   {
     __CTOR_LIST__ = . ;
@@ -89,6 +99,28 @@ SECTIONS
     PROVIDE(__RUNTIME_COPY_TABLE = .) ;
     LONG(LOADADDR(.data));  LONG(0 + ADDR(.data));  LONG(SIZEOF(.data));
     LONG(-1);               LONG(-1);               LONG(-1);
+  } > ROM
+
+  .ARM.extab :
+  {
+    . = ALIGN(4);
+    *(.ARM.extab)
+    *(.gnu.linkonce.armextab.*)
+    . = ALIGN(4);
+  } > ROM
+
+  .exidx :
+  {
+    . = ALIGN(4);
+    PROVIDE(__exidx_start = .);
+    *(.ARM.exidx*)
+    . = ALIGN(4);
+    PROVIDE(__exidx_end = .);
+  } > ROM
+
+  .ARM.attributes :
+  {
+    *(.ARM.attributes)
   } > ROM
 
   /* The ROM-to-RAM initialized data section */

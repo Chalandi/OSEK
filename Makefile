@@ -44,7 +44,9 @@ PYTHON  = python3
 OPS_BASE     = -Wall                                          \
                -Wextra                                        \
                -Wpedantic                                     \
-               -Wno-unused-function                           \
+               -Wconversion                                   \
+               -Wsign-conversion                              \
+               -Wshadow                                       \
                -Wno-variadic-macros                           \
                -O2                                            \
                -mcpu=cortex-m3                                \
@@ -54,10 +56,10 @@ OPS_BASE     = -Wall                                          \
                -mno-unaligned-access                          \
                -mno-long-calls                                \
                -fno-exceptions                                \
-               -fno-inline-functions                          \
                -gdwarf-2
 
 COPS         = -x c                                           \
+               -fno-inline-functions                          \
                $(OPS_BASE)                                    \
                -std=c99
 
@@ -87,15 +89,15 @@ ASOPS        = -x assembler                                   \
 # Linker flags
 ############################################################################################
 
-LOPS         = -x none                                        \
-               -nostartfiles                                  \
-               -nostdlib                                      \
-               -specs=nano.specs                              \
-               -specs=nosys.specs                             \
-               -e SysStartup_Init                             \
-               $(OPS_BASE)                                    \
-               -Wl,--print-memory-usage                       \
-               -Wl,-Map,$(OUTPUT_DIR)/OSEK.map                \
+LOPS         = -x none                                              \
+               -nostartfiles                                        \
+               -nostdlib                                            \
+               -specs=nano.specs                                    \
+               -specs=nosys.specs                                   \
+               -e SysStartup_Init                                   \
+               $(OPS_BASE)                                          \
+               -Wl,--print-memory-usage                             \
+               -Wl,-Map,$(OUTPUT_DIR)/Osek_pi_crunch_cm3.map        \
                -T $(LD_SCRIPT)
 
 

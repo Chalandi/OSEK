@@ -15,7 +15,7 @@ jobs:
         with:
           fetch-depth: '0'
       - name: update-tools
-        run: sudo sudo apt-get update -y;sudo apt-get install -y gcc-arm-none-eabi
+        run: sudo apt-get install gcc-arm-none-eabi
       - name: target-gcc-arm-none-eabi
         run: |
           bash Build.sh
